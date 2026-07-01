@@ -1,0 +1,6 @@
+{
+  "name": "WhatsApp Clone",
+  "description": "Um clone completo do WhatsApp com conversas, chamadas, status, e um bot de IA integrado usando a Gemini API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
