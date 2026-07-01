@@ -39,6 +39,8 @@ fun HomeScreen(
     isDarkMode: Boolean,
     isFirebaseReal: Boolean,
     syncStatus: SyncStatus,
+    userEmail: String?,
+    onLogout: () -> Unit,
     onSearchChanged: (String) -> Unit,
     onChatSelected: (Int) -> Unit,
     onStartCall: (Contact, isVideo: Boolean) -> Unit,
@@ -133,6 +135,60 @@ fun HomeScreen(
                                 imageVector = Icons.Default.CloudUpload,
                                 contentDescription = "Sincronizar Cloud"
                             )
+                        }
+
+                        var showMenu by remember { mutableStateOf(false) }
+
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Mais opções"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                if (userEmail != null) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Column {
+                                                Text(
+                                                    text = "Conectado como:",
+                                                    fontSize = 11.sp,
+                                                    color = Color.Gray
+                                                )
+                                                Text(
+                                                    text = userEmail,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        },
+                                        onClick = {},
+                                        enabled = false
+                                    )
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 4.dp),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                                    )
+                                }
+                                DropdownMenuItem(
+                                    text = { Text("Sair da Conta") },
+                                    onClick = {
+                                        showMenu = false
+                                        onLogout()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.ExitToApp,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 )

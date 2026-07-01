@@ -112,70 +112,86 @@ fun WhatsAppAppContent(viewModel: WhatsAppViewModel) {
     val activeCallState by viewModel.activeCallState.collectAsState()
     val isFirebaseReal by viewModel.isFirebaseReal.collectAsState()
     val firebaseSyncStatus by viewModel.firebaseSyncStatus.collectAsState()
+    val isUserAuthenticated by viewModel.isUserAuthenticated.collectAsState()
+    val authStatus by viewModel.authStatus.collectAsState()
+    val userEmail by viewModel.userEmail.collectAsState()
 
     // Main layout switching
     Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            selectedChatId != null && selectedChat != null -> {
-                val chat = selectedChat!!
-                val isTyping = typingStates[chat.id] ?: false
+        if (!isUserAuthenticated) {
+            AuthScreen(
+                authStatus = authStatus,
+                isFirebaseReal = isFirebaseReal,
+                onLogin = { email, password -> viewModel.loginWithEmailAndPassword(email, password) },
+                onSignUp = { name, email, password -> viewModel.signUpWithEmailAndPassword(name, email, password) },
+                onSkipAuth = { viewModel.skipAuth() },
+                onClearError = { viewModel.clearAuthError() }
+            )
+        } else {
+            when {
+                selectedChatId != null && selectedChat != null -> {
+                    val chat = selectedChat!!
+                    val isTyping = typingStates[chat.id] ?: false
 
-                ChatDetailScreen(
-                    chat = chat,
-                    messages = currentMessages,
-                    isTyping = isTyping,
-                    isDarkMode = isDarkMode,
-                    quotedMessage = quotedMessage,
-                    isRecordingAudio = isRecordingAudio,
-                    recordingDuration = recordingDuration,
-                    onBack = { viewModel.selectChat(null) },
-                    onSendMessage = { text -> viewModel.sendMessage(text) },
-                    onStartCall = { isVideo ->
-                        viewModel.startCall(
-                            contactId = chat.contactId,
-                            contactName = chat.name,
-                            contactAvatar = chat.avatar,
-                            isVideo = isVideo
-                        )
-                    },
-                    onDeleteChat = { viewModel.deleteChat(chat.id) },
-                    onSetQuotedMessage = { msg -> viewModel.setQuotedMessage(msg) },
-                    onClearQuotedMessage = { viewModel.clearQuotedMessage() },
-                    onStartRecordingAudio = { viewModel.startRecordingAudio() },
-                    onStopRecordingAudio = { send -> viewModel.stopRecordingAudio(send) }
-                )
-            }
-            else -> {
-                HomeScreen(
-                    chats = chats,
-                    contacts = contacts,
-                    statusUpdates = statusUpdates,
-                    callLogs = callLogs,
-                    searchQuery = searchQuery,
-                    isDarkMode = isDarkMode,
-                    isFirebaseReal = isFirebaseReal,
-                    syncStatus = firebaseSyncStatus,
-                    onSearchChanged = { q -> viewModel.updateSearchQuery(q) },
-                    onChatSelected = { id -> viewModel.selectChat(id) },
-                    onStartCall = { contact, isVideo ->
-                        viewModel.startCall(
-                            contactId = contact.id,
-                            contactName = contact.name,
-                            contactAvatar = contact.avatar,
-                            isVideo = isVideo
-                        )
-                    },
-                    onDeleteChat = { id -> viewModel.deleteChat(id) },
-                    onAddNewContact = { name, status, isAi -> 
-                        viewModel.createNewContactAndChat(name, status, isAi)
-                    },
-                    onToggleTheme = { viewModel.toggleTheme() },
-                    onOpenStatus = { list, index -> viewModel.openStatusViewer(list, index) },
-                    onPostStatus = { text -> viewModel.postStatus(text) },
-                    onClearCallHistory = { viewModel.clearAllCallHistory() },
-                    onSyncToFirebase = { viewModel.syncToFirebase() },
-                    onResetSyncStatus = { viewModel.resetSyncStatus() }
-                )
+                    ChatDetailScreen(
+                        chat = chat,
+                        messages = currentMessages,
+                        isTyping = isTyping,
+                        isDarkMode = isDarkMode,
+                        quotedMessage = quotedMessage,
+                        isRecordingAudio = isRecordingAudio,
+                        recordingDuration = recordingDuration,
+                        onBack = { viewModel.selectChat(null) },
+                        onSendMessage = { text -> viewModel.sendMessage(text) },
+                        onStartCall = { isVideo ->
+                            viewModel.startCall(
+                                contactId = chat.contactId,
+                                contactName = chat.name,
+                                contactAvatar = chat.avatar,
+                                isVideo = isVideo
+                            )
+                        },
+                        onDeleteChat = { viewModel.deleteChat(chat.id) },
+                        onSetQuotedMessage = { msg -> viewModel.setQuotedMessage(msg) },
+                        onClearQuotedMessage = { viewModel.clearQuotedMessage() },
+                        onStartRecordingAudio = { viewModel.startRecordingAudio() },
+                        onStopRecordingAudio = { send -> viewModel.stopRecordingAudio(send) }
+                    )
+                }
+                else -> {
+                    HomeScreen(
+                        chats = chats,
+                        contacts = contacts,
+                        statusUpdates = statusUpdates,
+                        callLogs = callLogs,
+                        searchQuery = searchQuery,
+                        isDarkMode = isDarkMode,
+                        isFirebaseReal = isFirebaseReal,
+                        syncStatus = firebaseSyncStatus,
+                        userEmail = userEmail,
+                        onLogout = { viewModel.logout() },
+                        onSearchChanged = { q -> viewModel.updateSearchQuery(q) },
+                        onChatSelected = { id -> viewModel.selectChat(id) },
+                        onStartCall = { contact, isVideo ->
+                            viewModel.startCall(
+                                contactId = contact.id,
+                                contactName = contact.name,
+                                contactAvatar = contact.avatar,
+                                isVideo = isVideo
+                            )
+                        },
+                        onDeleteChat = { id -> viewModel.deleteChat(id) },
+                        onAddNewContact = { name, status, isAi -> 
+                            viewModel.createNewContactAndChat(name, status, isAi)
+                        },
+                        onToggleTheme = { viewModel.toggleTheme() },
+                        onOpenStatus = { list, index -> viewModel.openStatusViewer(list, index) },
+                        onPostStatus = { text -> viewModel.postStatus(text) },
+                        onClearCallHistory = { viewModel.clearAllCallHistory() },
+                        onSyncToFirebase = { viewModel.syncToFirebase() },
+                        onResetSyncStatus = { viewModel.resetSyncStatus() }
+                    )
+                }
             }
         }
 
